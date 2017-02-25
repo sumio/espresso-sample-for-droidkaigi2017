@@ -15,24 +15,17 @@
  *
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package jp.jun_nama.droidkaigi2017.qiitabrowsersample.api;
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-rc1'
-        classpath 'me.tatarka:gradle-retrolambda:3.5.0'
-    }
-}
+import java.util.List;
 
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
+import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.QiitaItem;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
+import rx.Observable;
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+public interface QiitaItemsApi {
+
+    @GET("items")
+    public Observable<List<QiitaItem>> getQiitaItemsFirstPage(@Query("page") int page, @Query("per_page") int perPage);
 }

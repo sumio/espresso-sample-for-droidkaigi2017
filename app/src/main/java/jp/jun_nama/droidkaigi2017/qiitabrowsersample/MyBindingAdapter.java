@@ -15,24 +15,18 @@
  *
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package jp.jun_nama.droidkaigi2017.qiitabrowsersample;
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0-rc1'
-        classpath 'me.tatarka:gradle-retrolambda:3.5.0'
-    }
-}
+import android.databinding.BindingAdapter;
+import android.widget.ImageView;
 
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
+import com.bumptech.glide.Glide;
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+public class MyBindingAdapter {
+
+    @BindingAdapter({"imageUrl"})
+    public static void loadImage(ImageView imageView, String imageUrl) {
+        Glide.with(imageView.getContext()).load(imageUrl).into(imageView);
+    }
+
 }
