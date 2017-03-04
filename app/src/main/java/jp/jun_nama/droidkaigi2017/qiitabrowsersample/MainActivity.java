@@ -156,6 +156,7 @@ public class MainActivity extends AppCompatActivity
                 .beginTransaction()
                 .replace(R.id.content_placeholder, fragment)
                 .commit();
+        setTitle(R.string.local_faved);
     }
 
     private void showQiitaItemsFragment() {
@@ -164,6 +165,7 @@ public class MainActivity extends AppCompatActivity
                 .beginTransaction()
                 .replace(R.id.content_placeholder, fragment)
                 .commit();
+        setTitle(R.string.items_list);
     }
 
     private List<FavableQiitaItem> updateQiitaItemsList(List<FavableQiitaItem> favableQiitaItems, FavEvent favEvent) {

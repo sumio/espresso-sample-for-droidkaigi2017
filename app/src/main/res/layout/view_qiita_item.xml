@@ -29,8 +29,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/list_item_horizontal_padding"
-        android:paddingTop="@dimen/list_item_horizontal_padding">
+        android:paddingBottom="@dimen/list_item_vertical_padding"
+        android:paddingTop="@dimen/list_item_vertical_padding">
 
         <ImageView
             android:id="@+id/user_image"
@@ -38,6 +38,8 @@
             android:layout_height="@dimen/list_item_image_size"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
+            android:paddingStart="@dimen/list_item_horizontal_padding"
+            android:paddingEnd="@dimen/list_item_horizontal_padding"
             app:imageUrl="@{favableQiitaItem.profileImageUrl}"
             app:srcCompat="@mipmap/ic_launcher" />
 
@@ -48,6 +50,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:paddingStart="@dimen/list_item_text_padding"
+            android:paddingEnd="@dimen/list_item_text_padding"
             android:button="@drawable/checkbox_background"
             android:checked="@{favableQiitaItem.isFaved}"
             android:onClick="@{favableQiitaItem::onFavCheckBoxTapped}"/>
@@ -63,7 +67,8 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
-            android:padding="@dimen/list_item_text_padding"
+            android:paddingTop="@dimen/list_item_text_padding"
+            android:paddingBottom="@dimen/list_item_text_padding"
             android:text="@{favableQiitaItem.title}"
             android:onClick="@{() -> favableQiitaItem.launchCustomTabs(context)}"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
