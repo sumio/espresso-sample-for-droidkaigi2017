@@ -25,6 +25,7 @@ import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.FavableQiitaItem;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.MyProfile;
 import retrofit2.Retrofit;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.Subject;
@@ -36,7 +37,6 @@ public class MainActivity extends AppCompatActivity
     private ActivityMainBinding binding;
     private NavHeaderMainBinding navHeaderBinding;
     private Subject<User, User> myProfileSubject;
-    private UsersApi usersApi;
     private MainApplication app;
     private CompositeSubscription subscriptions;
     public Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> qiitaItemsSubject;
@@ -58,13 +58,11 @@ public class MainActivity extends AppCompatActivity
         qiitaItemsSubject = app.getQiitaItemsSubject();
 
         Retrofit retrofit = app.getRetrofit();
-        usersApi = retrofit.create(UsersApi.class);
-        QiitaItemsApi qiitaItemsApi = retrofit.create(QiitaItemsApi.class);
-
-
         if (QiitaService.isAuthenticated()) {
+            UsersApi usersApi = retrofit.create(UsersApi.class);
             usersApi.getMe().subscribeOn(Schedulers.io()).subscribe(myProfileSubject::onNext);
         }
+        QiitaItemsApi qiitaItemsApi = retrofit.create(QiitaItemsApi.class);
         qiitaItemsApi.getQiitaItemsFirstPage(1, 20)
                 .subscribeOn(Schedulers.io())
                 .concatMapIterable(i -> i)
@@ -77,17 +75,26 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         subscriptions = new CompositeSubscription();
-        subscriptions.add(myProfileSubject
-                .subscribeOn(Schedulers.io())
-                .map(MyProfile::from)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(navHeaderBinding::setMyProfile));
+        subscriptions.add(subscribeMyProfileUpdate());
+        subscriptions.add(subscribeFavEvents());
+        showQiitaItemsFragment();
+    }
+
+    private Subscription subscribeFavEvents() {
         Observable<FavEvent> favEventObservable = app.getFavEventSubject().distinctUntilChanged();
-        subscriptions.add(Observable.combineLatest(qiitaItemsSubject, favEventObservable, this::updateQiitaItemsList)
+        return Observable.combineLatest(qiitaItemsSubject, favEventObservable, this::updateQiitaItemsList)
                 .subscribeOn(Schedulers.io())
                 .distinctUntilChanged()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(qiitaItemsSubject::onNext));
+                .subscribe(qiitaItemsSubject::onNext);
+    }
+
+    private Subscription subscribeMyProfileUpdate() {
+        return myProfileSubject
+                .subscribeOn(Schedulers.io())
+                .map(MyProfile::from)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(navHeaderBinding::setMyProfile);
     }
 
     @Override
@@ -128,37 +135,35 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            Fragment fragment = new QiitaItemsFragment();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.content_placeholder, fragment)
-                    .commit();
-        } else if (id == R.id.nav_gallery) {
-            Fragment fragment = new FavsFragment();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.content_placeholder, fragment)
-                    .commit();
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_items_list) {
+            showQiitaItemsFragment();
+        } else if (id == R.id.nav_favorites_list) {
+            showFavsFragment();
         }
-
 
         binding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void showFavsFragment() {
+        Fragment fragment = new QiitaFavsFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content_placeholder, fragment)
+                .commit();
+    }
+
+    private void showQiitaItemsFragment() {
+        Fragment fragment = new QiitaItemsFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content_placeholder, fragment)
+                .commit();
     }
 
     private List<FavableQiitaItem> updateQiitaItemsList(List<FavableQiitaItem> favableQiitaItems, FavEvent favEvent) {

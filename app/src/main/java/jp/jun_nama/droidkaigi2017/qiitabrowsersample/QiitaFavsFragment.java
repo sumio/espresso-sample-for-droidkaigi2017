@@ -36,12 +36,12 @@ import rx.schedulers.Schedulers;
 import rx.subjects.Subject;
 import rx.subscriptions.CompositeSubscription;
 
-public class FavsFragment extends Fragment {
+public class QiitaFavsFragment extends Fragment {
 
     private Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> qiitaItemsSubject;
     private CompositeSubscription subscriptions;
 
-    public FavsFragment() {
+    public QiitaFavsFragment() {
         // Required empty public constructor
     }
 
