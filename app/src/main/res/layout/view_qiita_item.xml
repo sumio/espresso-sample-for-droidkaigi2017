@@ -19,64 +19,53 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
         <variable
             name="qiitaItem"
-            type="jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.QiitaItem"/>
+            type="jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.QiitaItem" />
     </data>
 
-    <LinearLayout
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:paddingBottom="@dimen/list_item_horizontal_padding"
+        android:paddingTop="@dimen/list_item_horizontal_padding">
+
+        <ImageView
+            android:id="@+id/user_image"
+            android:layout_width="@dimen/list_item_image_size"
+            android:layout_height="@dimen/list_item_image_size"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            app:imageUrl="@{qiitaItem.user.profileImageUrl}"
+            app:srcCompat="@mipmap/ic_launcher" />
 
 
-        <android.support.v7.widget.CardView
-            android:layout_width="match_parent"
+        <CheckBox
+            android:id="@+id/checkbox_fav"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/cardview_margin_vertical"
-            android:layout_marginEnd="@dimen/cardview_margin_horizontal"
-            android:layout_marginStart="@dimen/cardview_margin_horizontal"
-            android:layout_marginTop="@dimen/cardview_margin_vertical"
-            app:cardCornerRadius="10dp"
-            app:cardUseCompatPadding="true">
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:button="@drawable/checkbox_background" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:id="@+id/user_image"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    app:imageUrl="@{qiitaItem.user.profileImageUrl}"
-                    app:srcCompat="@mipmap/ic_launcher" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/user_image"
+            android:layout_alignTop="@+id/user_image"
+            android:layout_toEndOf="@+id/user_image"
+            android:layout_toStartOf="@+id/checkbox_fav"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:padding="@dimen/list_item_text_padding"
+            android:text="@{qiitaItem.title}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
 
-                <ImageButton
-                    android:id="@+id/image_fav"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerHorizontal="true"
-                    app:srcCompat="@android:drawable/btn_star_big_off" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@+id/user_image"
-                    android:layout_alignTop="@+id/user_image"
-                    android:layout_toEndOf="@+id/user_image"
-                    android:layout_toStartOf="@+id/image_fav"
-                    android:ellipsize="end"
-                    android:padding="@dimen/cardview_text_padding"
-                    android:text="@{qiitaItem.title}" />
+    </RelativeLayout>
 
 
-            </RelativeLayout>
-
-
-        </android.support.v7.widget.CardView>
-    </LinearLayout>
 </layout>
