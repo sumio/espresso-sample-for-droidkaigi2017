@@ -18,7 +18,6 @@
 package jp.jun_nama.droidkaigi2017.qiitabrowsersample;
 
 import android.app.Application;
-import android.text.TextUtils;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -29,9 +28,9 @@ import java.util.Collections;
 import java.util.List;
 
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.api.QiitaService;
-import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.QiitaItem;
+import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.FavEvent;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.User;
-import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.MyProfile;
+import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.FavableQiitaItem;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -39,6 +38,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.subjects.BehaviorSubject;
+import rx.subjects.PublishSubject;
 import rx.subjects.Subject;
 
 public class MainApplication extends Application {
@@ -50,16 +50,17 @@ public class MainApplication extends Application {
     private Retrofit retrofit;
 
 
-    private Subject<List<QiitaItem>, List<QiitaItem>> qiitaItemsSubject;
-    private Subject<List<QiitaItem>, List<QiitaItem>> qiitaFavsSubject;
+    private Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> qiitaItemsSubject;
+    private Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> qiitaFavsSubject;
+    private Subject<FavEvent, FavEvent> favEventSubject;
     private Subject<User, User> myProfileSubject;
-
 
     public synchronized OkHttpClient getRetrofitOkHttpClient() {
         if (retrofitOkHttpClient == null) {
             File cacheDir = new File(getCacheDir(), "okhttp3");
             cacheDir.mkdirs();
             OkHttpClient.Builder builder = getCommonOkHttpClient().newBuilder();
+            builder.addNetworkInterceptor(new QiitaService.AuthorizationInterceptor());
             builder.cache(new Cache(cacheDir, RETROFIT_CACHE_SIZE));
             retrofitOkHttpClient = builder.build();
 
@@ -78,12 +79,16 @@ public class MainApplication extends Application {
         return retrofit;
     }
 
-    public Subject<List<QiitaItem>, List<QiitaItem>> getQiitaItemsSubject() {
+    public Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> getQiitaItemsSubject() {
         return qiitaItemsSubject;
     }
 
-    public Subject<List<QiitaItem>, List<QiitaItem>> getQiitaFavsSubject() {
+    public Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> getQiitaFavsSubject() {
         return qiitaFavsSubject;
+    }
+
+    public Subject<FavEvent, FavEvent> getFavEventSubject() {
+        return favEventSubject;
     }
 
     public Subject<User, User> getMyProfileSubject() {
@@ -94,9 +99,10 @@ public class MainApplication extends Application {
     public void onCreate() {
         super.onCreate();
         initRetrofit();
-        qiitaItemsSubject = BehaviorSubject.create(Collections.<QiitaItem>emptyList()).toSerialized();
-        qiitaFavsSubject = BehaviorSubject.create(Collections.<QiitaItem>emptyList()).toSerialized();
-        myProfileSubject = BehaviorSubject.create(new User("android.resource://" + getPackageName() + "/" + R.mipmap.ic_launcher, "unknown", "unknown")).toSerialized();
+        qiitaItemsSubject = BehaviorSubject.create(Collections.<FavableQiitaItem>emptyList()).toSerialized();
+        qiitaFavsSubject = BehaviorSubject.create(Collections.<FavableQiitaItem>emptyList()).toSerialized();
+        favEventSubject = PublishSubject.<FavEvent>create().toSerialized();
+        myProfileSubject = BehaviorSubject.create(User.dummyUser(this)).toSerialized();
     }
 
     private synchronized void initRetrofit() {
@@ -116,9 +122,6 @@ public class MainApplication extends Application {
     private synchronized OkHttpClient getCommonOkHttpClient() {
         if (commonOkHttpClient == null) {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            if (!TextUtils.isEmpty(BuildConfig.API_KEY)) {
-                builder.addNetworkInterceptor(new QiitaService.AuthorizationInterceptor());
-            }
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
             builder.addNetworkInterceptor(loggingInterceptor);

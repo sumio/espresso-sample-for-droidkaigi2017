@@ -19,21 +19,17 @@ package jp.jun_nama.droidkaigi2017.qiitabrowsersample.model;
 
 import android.support.annotation.NonNull;
 
-public class QiitaItem {
-    @NonNull
-    public final String id;
-    @NonNull
-    public final String title;
-    @NonNull
-    public final String url;
-    @NonNull
-    public final User user;
+public class FavEvent {
 
-    public QiitaItem(@NonNull String id, @NonNull String title, @NonNull String url, @NonNull User user) {
-        this.id = id;
-        this.title = title;
-        this.url = url;
-        this.user = user;
+    public static final FavEvent DUMMY_FAV_EVENT = new FavEvent("", false);
+
+    @NonNull
+    public final String qiitaItemId;
+    public final boolean isFaved;
+
+    public FavEvent(@NonNull String qiitaItemId, boolean isFaved) {
+        this.qiitaItemId = qiitaItemId;
+        this.isFaved = isFaved;
     }
 
     @Override
@@ -41,32 +37,25 @@ public class QiitaItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        QiitaItem qiitaItem = (QiitaItem) o;
+        FavEvent favEvent = (FavEvent) o;
 
-        if (!id.equals(qiitaItem.id)) return false;
-        if (!title.equals(qiitaItem.title)) return false;
-        if (!url.equals(qiitaItem.url)) return false;
-        if (!user.equals(qiitaItem.user)) return false;
+        if (isFaved != favEvent.isFaved) return false;
+        return qiitaItemId.equals(favEvent.qiitaItemId);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + title.hashCode();
-        result = 31 * result + url.hashCode();
-        result = 31 * result + user.hashCode();
+        int result = qiitaItemId.hashCode();
+        result = 31 * result + (isFaved ? 1 : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return "QiitaItem{" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", url='" + url + '\'' +
-                ", user=" + user +
+        return "FavEvent{" +
+                "qiitaItemId='" + qiitaItemId + '\'' +
+                ", isFaved=" + isFaved +
                 '}';
     }
 }

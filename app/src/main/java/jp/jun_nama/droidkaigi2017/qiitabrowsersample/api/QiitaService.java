@@ -17,21 +17,12 @@
 
 package jp.jun_nama.droidkaigi2017.qiitabrowsersample.api;
 
-import android.content.Context;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.GlideBuilder;
-import com.bumptech.glide.integration.okhttp3.OkHttpUrlLoader;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.module.GlideModule;
+import android.text.TextUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.BuildConfig;
-import jp.jun_nama.droidkaigi2017.qiitabrowsersample.MainApplication;
 import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -39,12 +30,20 @@ public class QiitaService {
 
     public static final String BASE_URL = "https://qiita.com/api/v2/";
 
+    public static boolean isAuthenticated() {
+        return !TextUtils.isEmpty(BuildConfig.API_KEY);
+    }
+
     public static class AuthorizationInterceptor implements Interceptor {
         @Override
         public Response intercept(Chain chain) throws IOException {
+            if (!isAuthenticated()) {
+                return chain.proceed(chain.request());
+            }
             Request request = chain.request().newBuilder()
                     .header("Authorization", "Bearer " + BuildConfig.API_KEY)
                     .build();
+
             return chain.proceed(request);
         }
     }

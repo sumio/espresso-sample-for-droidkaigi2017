@@ -17,15 +17,27 @@
 
 package jp.jun_nama.droidkaigi2017.qiitabrowsersample.model;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+
+import jp.jun_nama.droidkaigi2017.qiitabrowsersample.R;
+
 public class User {
+    @NonNull
     public final String id;
+    @NonNull
     public final String name;
+    @NonNull
     public final String profileImageUrl;
 
-    public User(String id, String name, String profileImageUrl) {
+    public User(@NonNull String id, @NonNull String name, @NonNull String profileImageUrl) {
         this.id = id;
         this.name = name;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public static User dummyUser(@NonNull Context context) {
+        return new User("android.resource://" + context.getPackageName() + "/" + R.mipmap.ic_launcher, "unknown", "unknown");
     }
 
     @Override
@@ -35,17 +47,17 @@ public class User {
 
         User user = (User) o;
 
-        if (id != null ? !id.equals(user.id) : user.id != null) return false;
-        if (name != null ? !name.equals(user.name) : user.name != null) return false;
-        return profileImageUrl != null ? profileImageUrl.equals(user.profileImageUrl) : user.profileImageUrl == null;
+        if (!id.equals(user.id)) return false;
+        if (!name.equals(user.name)) return false;
+        return profileImageUrl.equals(user.profileImageUrl);
 
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (profileImageUrl != null ? profileImageUrl.hashCode() : 0);
+        int result = id.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + profileImageUrl.hashCode();
         return result;
     }
 

@@ -14,11 +14,12 @@ import android.view.MenuItem;
 import java.util.List;
 
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.api.QiitaItemsApi;
+import jp.jun_nama.droidkaigi2017.qiitabrowsersample.api.QiitaService;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.api.UsersApi;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.databinding.ActivityMainBinding;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.databinding.NavHeaderMainBinding;
-import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.QiitaItem;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.User;
+import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.FavableQiitaItem;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.MyProfile;
 import retrofit2.Retrofit;
 import rx.android.schedulers.AndroidSchedulers;
@@ -47,15 +48,21 @@ public class MainActivity extends AppCompatActivity
         binding.setNavigationItemSelectedListener(this);
         mainApplication = (MainApplication) getApplicationContext();
         myProfileSubject = mainApplication.getMyProfileSubject();
-        Subject<List<QiitaItem>, List<QiitaItem>> qiitaItemsSubject = mainApplication.getQiitaItemsSubject();
+        Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> qiitaItemsSubject = mainApplication.getQiitaItemsSubject();
 
         Retrofit retrofit = mainApplication.getRetrofit();
         usersApi = retrofit.create(UsersApi.class);
         QiitaItemsApi qiitaItemsApi = retrofit.create(QiitaItemsApi.class);
 
-        usersApi.getUser("sumio").subscribeOn(Schedulers.io()).subscribe(myProfileSubject::onNext);
-        qiitaItemsApi.getQiitaItemsFirstPage(1, 20).subscribeOn(Schedulers.io()).subscribe(qiitaItemsSubject::onNext);
-
+        if (QiitaService.isAuthenticated()) {
+            usersApi.getMe().subscribeOn(Schedulers.io()).subscribe(myProfileSubject::onNext);
+        }
+        qiitaItemsApi.getQiitaItemsFirstPage(1, 20)
+                .subscribeOn(Schedulers.io())
+                .concatMapIterable(i -> i)
+                .map(FavableQiitaItem::new)
+                .toList()
+                .subscribe(qiitaItemsSubject::onNext);
     }
 
     @Override

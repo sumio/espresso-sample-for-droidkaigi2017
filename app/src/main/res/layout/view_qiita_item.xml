@@ -21,8 +21,8 @@
     <data>
 
         <variable
-            name="qiitaItem"
-            type="jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.QiitaItem" />
+            name="favableQiitaItem"
+            type="jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.FavableQiitaItem" />
     </data>
 
 
@@ -38,7 +38,7 @@
             android:layout_height="@dimen/list_item_image_size"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            app:imageUrl="@{qiitaItem.user.profileImageUrl}"
+            app:imageUrl="@{favableQiitaItem.profileImageUrl}"
             app:srcCompat="@mipmap/ic_launcher" />
 
 
@@ -48,7 +48,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:button="@drawable/checkbox_background" />
+            android:button="@drawable/checkbox_background"
+            android:checked="@{favableQiitaItem.isFaved}"
+            android:onClick="@{favableQiitaItem::onFavCheckBoxTapped}"/>
+
 
         <TextView
             android:layout_width="0dp"
@@ -61,11 +64,8 @@
             android:gravity="center_vertical"
             android:maxLines="1"
             android:padding="@dimen/list_item_text_padding"
-            android:text="@{qiitaItem.title}"
+            android:text="@{favableQiitaItem.title}"
+            android:onClick="@{() -> favableQiitaItem.launchCustomTabs(context)}"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-
     </RelativeLayout>
-
-
 </layout>

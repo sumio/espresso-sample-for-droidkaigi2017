@@ -17,14 +17,19 @@
 
 package jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel;
 
+import android.support.annotation.NonNull;
+
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.User;
 
 public class MyProfile {
+    @NonNull
     public final String profileImageUrl;
+    @NonNull
     public final String id;
+    @NonNull
     public final String name;
 
-    public MyProfile(String profileImageUrl, String id, String name) {
+    public MyProfile(@NonNull String profileImageUrl, @NonNull String id, @NonNull String name) {
         this.profileImageUrl = profileImageUrl;
         this.id = id;
         this.name = name;
@@ -41,18 +46,17 @@ public class MyProfile {
 
         MyProfile myProfile = (MyProfile) o;
 
-        if (profileImageUrl != null ? !profileImageUrl.equals(myProfile.profileImageUrl) : myProfile.profileImageUrl != null)
-            return false;
-        if (id != null ? !id.equals(myProfile.id) : myProfile.id != null) return false;
-        return name != null ? name.equals(myProfile.name) : myProfile.name == null;
+        if (!profileImageUrl.equals(myProfile.profileImageUrl)) return false;
+        if (!id.equals(myProfile.id)) return false;
+        return name.equals(myProfile.name);
 
     }
 
     @Override
     public int hashCode() {
-        int result = profileImageUrl != null ? profileImageUrl.hashCode() : 0;
-        result = 31 * result + (id != null ? id.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
+        int result = profileImageUrl.hashCode();
+        result = 31 * result + id.hashCode();
+        result = 31 * result + name.hashCode();
         return result;
     }
 
