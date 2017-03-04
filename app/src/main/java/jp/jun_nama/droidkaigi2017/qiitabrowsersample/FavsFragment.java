@@ -29,23 +29,22 @@ import android.view.ViewGroup;
 import java.util.List;
 
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.FavableQiitaItem;
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.Subject;
 import rx.subscriptions.CompositeSubscription;
 
+public class FavsFragment extends Fragment {
 
-public class QiitaItemsFragment extends Fragment {
-
-    private static final String TAG = QiitaItemsFragment.class.getSimpleName();
     private Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> qiitaItemsSubject;
     private CompositeSubscription subscriptions;
 
-
-    public QiitaItemsFragment() {
+    public FavsFragment() {
         // Required empty public constructor
     }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,11 +61,12 @@ public class QiitaItemsFragment extends Fragment {
         RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         QiitaItemsAdapter adapter = new QiitaItemsAdapter();
         recyclerView.setAdapter(adapter);
-        Subscription qiitaItemsUpdateSubscription = qiitaItemsSubject
+        Subscription qiitaFavsUpdateSubscription = qiitaItemsSubject
                 .subscribeOn(Schedulers.io())
+                .flatMap(itemList -> Observable.from(itemList).filter(item -> item.isFaved).toList())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(adapter::setQiitaItemList);
-        subscriptions.add(qiitaItemsUpdateSubscription);
+        subscriptions.addAll(qiitaFavsUpdateSubscription);
 
         return rootView;
     }
@@ -76,4 +76,5 @@ public class QiitaItemsFragment extends Fragment {
         subscriptions.clear();
         super.onDestroyView();
     }
+
 }

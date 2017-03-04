@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.api.QiitaItemsApi;
@@ -18,13 +19,16 @@ import jp.jun_nama.droidkaigi2017.qiitabrowsersample.api.QiitaService;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.api.UsersApi;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.databinding.ActivityMainBinding;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.databinding.NavHeaderMainBinding;
+import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.FavEvent;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.model.User;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.FavableQiitaItem;
 import jp.jun_nama.droidkaigi2017.qiitabrowsersample.viewmodel.MyProfile;
 import retrofit2.Retrofit;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.Subject;
+import rx.subscriptions.CompositeSubscription;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -33,7 +37,10 @@ public class MainActivity extends AppCompatActivity
     private NavHeaderMainBinding navHeaderBinding;
     private Subject<User, User> myProfileSubject;
     private UsersApi usersApi;
-    public MainApplication mainApplication;
+    private MainApplication app;
+    private CompositeSubscription subscriptions;
+    public Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> qiitaItemsSubject;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,13 +53,14 @@ public class MainActivity extends AppCompatActivity
         binding.setDrawerListener(toggle);
         toggle.syncState();
         binding.setNavigationItemSelectedListener(this);
-        mainApplication = (MainApplication) getApplicationContext();
-        myProfileSubject = mainApplication.getMyProfileSubject();
-        Subject<List<FavableQiitaItem>, List<FavableQiitaItem>> qiitaItemsSubject = mainApplication.getQiitaItemsSubject();
+        app = (MainApplication) getApplicationContext();
+        myProfileSubject = app.getMyProfileSubject();
+        qiitaItemsSubject = app.getQiitaItemsSubject();
 
-        Retrofit retrofit = mainApplication.getRetrofit();
+        Retrofit retrofit = app.getRetrofit();
         usersApi = retrofit.create(UsersApi.class);
         QiitaItemsApi qiitaItemsApi = retrofit.create(QiitaItemsApi.class);
+
 
         if (QiitaService.isAuthenticated()) {
             usersApi.getMe().subscribeOn(Schedulers.io()).subscribe(myProfileSubject::onNext);
@@ -68,11 +76,24 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        myProfileSubject
+        subscriptions = new CompositeSubscription();
+        subscriptions.add(myProfileSubject
                 .subscribeOn(Schedulers.io())
                 .map(MyProfile::from)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(navHeaderBinding::setMyProfile);
+                .subscribe(navHeaderBinding::setMyProfile));
+        Observable<FavEvent> favEventObservable = app.getFavEventSubject().distinctUntilChanged();
+        subscriptions.add(Observable.combineLatest(qiitaItemsSubject, favEventObservable, this::updateQiitaItemsList)
+                .subscribeOn(Schedulers.io())
+                .distinctUntilChanged()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(qiitaItemsSubject::onNext));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        subscriptions.clear();
     }
 
     @Override
@@ -120,7 +141,11 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.content_placeholder, fragment)
                     .commit();
         } else if (id == R.id.nav_gallery) {
-
+            Fragment fragment = new FavsFragment();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_placeholder, fragment)
+                    .commit();
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -135,4 +160,17 @@ public class MainActivity extends AppCompatActivity
         binding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private List<FavableQiitaItem> updateQiitaItemsList(List<FavableQiitaItem> favableQiitaItems, FavEvent favEvent) {
+        ArrayList<FavableQiitaItem> copyOfFavableQiitaItems = new ArrayList<>(favableQiitaItems);
+        for (int i = 0; i < copyOfFavableQiitaItems.size(); i++) {
+            FavableQiitaItem favableQiitaItem = copyOfFavableQiitaItems.get(i);
+            if (favableQiitaItem.qiitaItemid.equals(favEvent.qiitaItemId)) {
+                copyOfFavableQiitaItems.set(i, favableQiitaItem.newInstance(favEvent.isFaved));
+            }
+        }
+        return copyOfFavableQiitaItems;
+    }
+
+
 }
