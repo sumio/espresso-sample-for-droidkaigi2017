@@ -17,7 +17,6 @@
 
 package jp.jun_nama.espresso.commons;
 
-import android.content.res.Resources;
 import android.support.annotation.IdRes;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
@@ -50,7 +49,6 @@ public class RecyclerViewUtils {
      */
     public static ViewAction clickDescendantViewWithId(@IdRes final int id) {
         return new ViewAction() {
-            private Resources resources = null;
 
             @Override
             public Matcher<View> getConstraints() {
@@ -59,16 +57,7 @@ public class RecyclerViewUtils {
 
             @Override
             public String getDescription() {
-                String idDesc = Integer.toString(id);
-                if (resources != null) {
-                    try {
-                        idDesc = resources.getResourceName(id);
-                    } catch (Resources.NotFoundException e) {
-                        // ignore.
-                        // idDesc would use int value.
-                    }
-                }
-                return "Click on a descendant view with id: " + idDesc;
+                return "Click on a descendant view with id: " + id;
             }
 
             @Override
