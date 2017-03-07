@@ -37,7 +37,7 @@ public class User {
     }
 
     public static User dummyUser(@NonNull Context context) {
-        return new User("android.resource://" + context.getPackageName() + "/" + R.mipmap.ic_launcher, "unknown", "unknown");
+        return new User("unknown", "unknown", "android.resource://" + context.getPackageName() + "/" + R.mipmap.ic_launcher);
     }
 
     @Override
