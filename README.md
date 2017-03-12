@@ -46,7 +46,7 @@ DroidKaigi 2017のトーク「[変更に強いEspressoテストコードを効�
   - カスタムテストランナーとして実装されているため、[`build.gradle`の`testInstrumentationRunner`](app/build.gradle#L14)を修正する必要があります。
   - RxJavaで、`Schedulers.computation()`などの、メインスレッドでも`Schedulers.io()`でもないスケジューラを使っている場合は、そのままでは動作しないと思われます。  
   利用している全てのスケジューラのスレッドプールを、同様な方法で`AsyncTask`のスレッドプールに差し替えることで対応できる可能性があります。
-  - このクラスは、Joshua Kovach氏によるブログ記事[Retrofitting Espresso](https://collectiveidea.com/blog/archives/2016/10/13/retrofitting-espresso)で紹介されている、Kotlinで書かれたサンプルコードを参考に、Javaで実装し直したものです。
+  - このクラスは、Joshua Kovach氏によるブログ記事「[Retrofitting Espresso](https://collectiveidea.com/blog/archives/2016/10/13/retrofitting-espresso)」で紹介されている、Kotlinで書かれたサンプルコードを参考に、Javaで実装し直したものです。
 - [`MoreViewMatchers.java`](app/src/androidTest/java/jp/jun_nama/espresso/commons/MoreViewMatchers.java): 当日スライドp. [46](https://speakerdeck.com/sumio/droidkaigi2017-lets-write-sustainable-espresso-test-rapidly?slide=46)で紹介した、Espresso Test Recorderのバグ([Issue 231461](https://code.google.com/p/android/issues/detail?id=231461))を回避した`childAtPosition()`メソッドの実装です。
 
 # License
